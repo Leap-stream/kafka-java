@@ -46,11 +46,25 @@
             <version>${slf4j.version}</version>
         </dependency>
 
-        <!-- Optional: For JSON serialization -->
+        <!-- JSON serialization (for Supabase REST payloads) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.15.2</version>
+        </dependency>
+
+        <!-- HTTP client for calling Supabase REST API -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+        </dependency>
+
+        <!-- Gson for lightweight JSON handling -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
         </dependency>
     </dependencies>
 
@@ -79,6 +93,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <!-- Change this dynamically when packaging -->
                                     <mainClass>com.example.kafka.ProducerApp</mainClass>
                                 </transformer>
                             </transformers>
@@ -86,8 +101,17 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Optional: Run apps directly from Maven -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <mainClass>com.example.kafka.ProducerApp</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
 </project>
-
