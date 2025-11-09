@@ -21,6 +21,7 @@ public class KafkaConsumerToSupabase {
     private static final String TABLE_NAME = "kafka_messages";
 
     public static void main(String[] args) throws Exception {
+        // Kafka consumer config
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "supabase-consumer");
@@ -31,27 +32,43 @@ public class KafkaConsumerToSupabase {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Collections.singletonList("test-topic"));
+        consumer.subscribe(Collections.singletonList("nse"));
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
 
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(java.time.Duration.ofSeconds(1));
             for (ConsumerRecord<String, String> record : records) {
-                System.out.println("Consumed: " + record.value());
+                String line = record.value();
+                String[] cols = line.split(",");
 
-                // Build JSON payload
-                JsonObject payload = new JsonObject();
-                payload.addProperty("message", record.value());
+                // Skip malformed lines
+                if (cols.length < 6) {
+                    System.out.println("⚠ Skipping malformed line: " + line);
+                    continue;
+                }
 
-                // Post to Supabase
-                HttpPost request = new HttpPost(BASE_URL + "/rest/v1/" + TABLE_NAME);
-                request.addHeader("apikey", SUPABASE_API_KEY);
-                request.addHeader("Authorization", "Bearer " + SUPABASE_API_KEY);
-                request.addHeader("Content-Type", "application/json");
-                request.setEntity(new StringEntity(payload.toString()));
+                try {
+                    JsonObject payload = new JsonObject();
+                    payload.addProperty("timestamp", cols[0].trim());
+                    payload.addProperty("symbol", cols[1].trim());
+                    payload.addProperty("last_price", Double.parseDouble(cols[2].trim()));
+                    payload.addProperty("change", Double.parseDouble(cols[3].trim()));
+                    payload.addProperty("pchange", Double.parseDouble(cols[4].trim()));
+                    payload.addProperty("volume", Long.parseLong(cols[5].trim()));
 
-                httpClient.execute(request).close();
+                    HttpPost request = new HttpPost(BASE_URL + "/rest/v1/" + TABLE_NAME);
+                    request.addHeader("apikey", SUPABASE_API_KEY);
+                    request.addHeader("Authorization", "Bearer " + SUPABASE_API_KEY);
+                    request.addHeader("Content-Type", "application/json");
+                    request.setEntity(new StringEntity(payload.toString()));
+
+                    httpClient.execute(request).close();
+                    System.out.println("✅ Pushed: " + cols[1].trim() + " at " + cols[0].trim());
+                } catch (Exception e) {
+                    System.out.println("❌ Failed to push: " + line);
+                    e.printStackTrace();
+                }
             }
         }
     }
