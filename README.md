@@ -14,6 +14,7 @@ create table kafka_messages (
 
 Imp cmds:
 
+mvn clean compile
 
 ./kafka-storage format \
   --config /home/arbaz/kafka-dev/confluent-kafka/confluent-8.1.0/etc/kafka/server.properties \
