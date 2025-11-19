@@ -75,6 +75,11 @@ public class ProducerApp {
         props.put("bootstrap.servers", "localhost:9092");
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("acks", "all");
+        props.put("retries", Integer.MAX_VALUE);
+        props.put("enable.idempotence", "true");
+        props.put("max.in.flight.requests.per.connection", "1");
+
         return props;
     }
 }
