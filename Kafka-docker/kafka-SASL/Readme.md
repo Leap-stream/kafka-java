@@ -14,6 +14,8 @@ kafka-topics \
 If authentication works, you should not see:
 
 Unexpected Kafka request of type METADATA during SASL handshake
+
+
 Test 2 - Create Topic
 kafka-topics \
 --bootstrap-server localhost:9092 \
