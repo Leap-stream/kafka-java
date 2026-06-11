@@ -17,12 +17,7 @@ Unexpected Kafka request of type METADATA during SASL handshake
 
 
 Test 2 - Create Topic
-kafka-topics \
---bootstrap-server localhost:9092 \
---command-config /etc/kafka/client.properties \
---create \
---topic test-topic \
---partitions 1 \
---replication-factor 1
+
+kafka-topics --bootstrap-server localhost:9092 --command-config /etc/kafka/client.properties --create --topic test-topic --partitions 1 --replication-factor 1
 
 kafka-console-producer --bootstrap-server localhost:9092 --producer.config /etc/kafka/client.properties --topic logs-topic 
