@@ -24,3 +24,5 @@ kafka-topics \
 --topic test-topic \
 --partitions 1 \
 --replication-factor 1
+
+kafka-console-producer --bootstrap-server localhost:9092 --producer.config /etc/kafka/client.properties --topic logs-topic 
